@@ -1,4 +1,4 @@
-import { StyleSheet, Image, Platform } from 'react-native';
+import { StyleSheet, Image, Platform, Button, GestureResponderEvent } from 'react-native';
 
 import { Collapsible } from '@/components/Collapsible';
 import { ExternalLink } from '@/components/ExternalLink';
@@ -95,6 +95,13 @@ export default function TabTwoScreen() {
   );
 }
 
+    <Button
+      onPress={onPressLearnMore}
+      title="Learn More"
+      color="#841584"
+      accessibilityLabel="Learn more about this purple button"
+    />
+
 const styles = StyleSheet.create({
   headerImage: {
     color: '#808080',
@@ -107,3 +114,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
 });
+function onPressLearnMore(event: GestureResponderEvent): void {
+  throw new Error('Function not implemented.');
+}
+
