@@ -1,24 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ImageBackground, Image, StyleSheet, TextInput, Button } from 'react-native';
+import { View, Text, ImageBackground, Image, StyleSheet, TextInput, Button, Picker } from 'react-native';
 
 const HomeScreen = () => {
   const [amount, setAmount] = useState('');
   const [convertedAmount, setConvertedAmount] = useState(null);
-  const [rate, setRate] = useState(null);
+  const [rates, setRates] = useState({});
+  const [selectedCurrency, setSelectedCurrency] = useState('USD');
 
   useEffect(() => {
-    fetch('https://api.exchangerate-api.com/v4/latest/USD')
+    fetch('https://api.exchangerate-api.com/v4/latest/BRL')
       .then(response => response.json())
       .then(data => {
-        setRate(data.rates.BRL); // Obtendo a taxa de câmbio do dólar para real
+        setRates(data.rates);
       })
       .catch(error => console.error('Erro ao buscar taxa de câmbio:', error));
   }, []);
 
   const convertCurrency = () => {
     const value = parseFloat(amount);
-    if (!isNaN(value) && rate) {
-      setConvertedAmount((value * rate).toFixed(2));
+    if (!isNaN(value) && rates[selectedCurrency]) {
+      setConvertedAmount((value / rates[selectedCurrency]).toFixed(2));
     } else {
       setConvertedAmount(null);
     }
@@ -27,7 +28,7 @@ const HomeScreen = () => {
   return (
     <View style={styles.container}>
       <ImageBackground 
-        source={require('@/assets/images/fundo-crash.png')}
+        source={require('@/assets/images/fundo-crash.png')} 
         style={styles.headerBackground}
       >
         <Image 
@@ -39,14 +40,24 @@ const HomeScreen = () => {
       <View style={styles.contentContainer}>
         <Text style={styles.title}>Crash convertor de moeda 👋</Text>
         <Text style={styles.subtitle}>Selecione a moeda primária</Text>
+
+        <Picker
+          selectedValue={selectedCurrency}
+          style={styles.picker}
+          onValueChange={(itemValue) => setSelectedCurrency(itemValue)}
+        >
+          {Object.keys(rates).map((currency) => (
+            <Picker.Item key={currency} label={currency} value={currency} />
+          ))}
+        </Picker>
         
-        <Text style={styles.label}>Valor em USD:</Text>
+        <Text style={styles.label}>Valor:</Text>
         <TextInput 
           style={styles.input} 
           keyboardType="numeric"
           value={amount}
           onChangeText={setAmount}
-          placeholder="Digite o valor em USD"
+          placeholder={`Digite o valor em ${selectedCurrency}`}
         />
         <Button title="Converter para BRL" onPress={convertCurrency} />
 
@@ -105,6 +116,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginTop: 10,
   },
+  picker: {
+    height: 50,
+    width: '100%',
+    marginBottom: 10,
+  }
 });
 
 export default HomeScreen;
