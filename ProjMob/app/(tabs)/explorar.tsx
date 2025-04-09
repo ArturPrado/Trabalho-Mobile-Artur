@@ -1,4 +1,4 @@
-import { StyleSheet, TextInput, ScrollView, Button, GestureResponderEvent, View, Text } from 'react-native';
+import { StyleSheet, TextInput, ScrollView, View, Text } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
@@ -6,36 +6,31 @@ import { ThemedView } from '@/components/ThemedView';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 
 export default function TabTwoScreen() {
-  const [exchangeRates, setExchangeRates] = useState<any>(null);
-  const [allRates, setAllRates] = useState<any>(null);
+  const [dailyRates, setDailyRates] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredRates, setFilteredRates] = useState<any>({});
 
   useEffect(() => {
-    fetch('https://open.er-api.com/v6/latest/BRL')
+    fetch('https://api.exchangerate.host/latest?base=BRL')
       .then(response => response.json())
       .then(data => {
-        setExchangeRates({
-          USD: data.rates.USD,
-          EUR: data.rates.EUR,
-          GBP: data.rates.GBP,
-          JPY: data.rates.JPY,
-        });
-        setAllRates(data.rates);
+        setDailyRates(data.rates);
       })
-      .catch(error => console.error('Erro ao buscar taxas de câmbio:', error));
+      .catch(error => console.error('Erro ao buscar variação diária da moeda:', error));
   }, []);
 
   useEffect(() => {
-    if (searchQuery.trim() !== '' && allRates) {
+    if (searchQuery.trim() !== '' && dailyRates) {
       const filtered = Object.fromEntries(
-        Object.entries(allRates).filter(([key]) => key.toUpperCase().includes(searchQuery.toUpperCase()))
+        Object.entries(dailyRates).filter(([key]) =>
+          key.toUpperCase().includes(searchQuery.toUpperCase())
+        )
       );
       setFilteredRates(filtered);
     } else {
       setFilteredRates({});
     }
-  }, [searchQuery, allRates]);
+  }, [searchQuery, dailyRates]);
 
   return (
     <ParallaxScrollView
@@ -49,20 +44,25 @@ export default function TabTwoScreen() {
         />
       }>
       <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Histórico de Câmbio</ThemedText>
+        <ThemedText type="title">Como funciona a variação de moeda?</ThemedText>
       </ThemedView>
-      <ThemedText>Confira as taxas de câmbio mais recentes em relação ao Real (BRL).</ThemedText>
-      {exchangeRates ? (
+      <ThemedText>
+        A variação de moeda acontece devido a diversos fatores econômicos e políticos. Entre eles:
+        {'\n'}• Inflação e taxa de juros{''}• Estabilidade política{''}• Oferta e demanda por moedas estrangeiras{''}• Balança comercial e reservas internacionais{''}
+        Acompanhe abaixo a variação diária das principais moedas em relação ao Real (BRL):
+      </ThemedText>
+
+      {dailyRates ? (
         <View style={styles.table}>
-          <Text style={styles.tableRow}>USD: {exchangeRates.USD.toFixed(2)}</Text>
-          <Text style={styles.tableRow}>EUR: {exchangeRates.EUR.toFixed(2)}</Text>
-          <Text style={styles.tableRow}>GBP: {exchangeRates.GBP.toFixed(2)}</Text>
-          <Text style={styles.tableRow}>JPY: {exchangeRates.JPY.toFixed(2)}</Text>
+          <Text style={styles.tableRow}>USD: {dailyRates.USD?.toFixed(2)}</Text>
+          <Text style={styles.tableRow}>EUR: {dailyRates.EUR?.toFixed(2)}</Text>
+          <Text style={styles.tableRow}>GBP: {dailyRates.GBP?.toFixed(2)}</Text>
+          <Text style={styles.tableRow}>JPY: {dailyRates.JPY?.toFixed(2)}</Text>
         </View>
       ) : (
         <Text>Carregando dados...</Text>
       )}
-      
+
       <ThemedView style={styles.searchContainer}>
         <TextInput
           style={styles.input}
@@ -71,7 +71,7 @@ export default function TabTwoScreen() {
           value={searchQuery}
         />
       </ThemedView>
-      
+
       {Object.keys(filteredRates).length > 0 ? (
         <ScrollView style={styles.searchResults}>
           {Object.entries(filteredRates).map(([currency, rate], index) => (
