@@ -10,10 +10,15 @@ const HomeScreen = () => {
   const [filteredRates, setFilteredRates] = useState({});
 
   useEffect(() => {
+    const mainCurrencies = ['USD', 'EUR', 'GBP', 'JPY', 'AUD', 'CAD', 'CHF', 'CNY'];
+
     fetch('https://api.exchangerate-api.com/v4/latest/BRL')
       .then(response => response.json())
       .then(data => {
-        setRates(data.rates);
+        const filtered = Object.fromEntries(
+          Object.entries(data.rates).filter(([key]) => mainCurrencies.includes(key))
+        );
+        setRates(filtered);
       })
       .catch(error => console.error('Erro ao buscar taxa de câmbio:', error));
   }, []);
@@ -64,7 +69,7 @@ const HomeScreen = () => {
                 style={[styles.currencyButton, selectedCurrency === currency && styles.selectedCurrencyButton]}
                 onPress={() => setSelectedCurrency(currency)}
               >
-                <Text style={styles.currencyButtonText}>{currency}</Text>
+                <Text style={[styles.currencyButtonText, selectedCurrency === currency && styles.selectedCurrencyButtonText]}>{currency}</Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -83,13 +88,6 @@ const HomeScreen = () => {
         {convertedAmount !== null && (
           <Text style={styles.result}>Valor convertido: R$ {convertedAmount}</Text>
         )}
-
-        <TextInput
-          style={styles.input}
-          placeholder="Buscar moeda..."
-          onChangeText={setSearchQuery}
-          value={searchQuery}
-        />
 
         {Object.keys(filteredRates).length > 0 ? (
           <ScrollView style={styles.searchResults}>
@@ -179,15 +177,31 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   currencyButton: {
-    padding: 8,
-    backgroundColor: '#FFD700',
-    borderRadius: 5,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    backgroundColor: '#f2f2f2',
+    borderRadius: 25,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    marginRight: 8,
+    marginBottom: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
   },
   selectedCurrencyButton: {
     backgroundColor: '#FFA500',
+    borderColor: '#FF8C00',
   },
   currencyButtonText: {
     fontWeight: 'bold',
+    color: '#333',
+    fontSize: 16,
+  },
+  selectedCurrencyButtonText: {
+    color: '#fff',
   },
 });
 
