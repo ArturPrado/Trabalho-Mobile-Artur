@@ -16,38 +16,25 @@ export default function HomeScreen() {
         />
       }>
       <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
+        <ThemedText type="title">SOBRE</ThemedText>
         <HelloWave />
       </ThemedView>
       <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12'
-            })}
+        <ThemedText type="subtitle">Meu nome é Artur Fernandes do Prado</ThemedText>
+        <ThemedView style={styles.titleContainer}>
+          <ThemedText type="defaultSemiBold">Eu sou aluno do Colégio Estadual Civico Militar Guido Arzua</ThemedText>
+          {' '}
           </ThemedText>{' '}
-          to open developer tools.
+        <ThemedView style={styles.titleContainer}></ThemedView>
+      </ThemedView>
+      <ThemedView style={styles.stepContainer}>
+        <ThemedText>
+          Tenho 18 anos, estou no terceiro ano do ensino médio do curso técnico
         </ThemedText>
       </ThemedView>
       <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
         <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
+          Sou muito bem compromissado com a minha namorada e ela é muito especial para mim.{' '}
         </ThemedText>
       </ThemedView>
     </ParallaxScrollView>
@@ -56,7 +43,6 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   titleContainer: {
-    flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
   },
