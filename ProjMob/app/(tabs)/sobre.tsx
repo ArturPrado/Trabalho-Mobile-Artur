@@ -1,6 +1,5 @@
 import { Image, StyleSheet, Platform } from 'react-native';
 
-import { HelloWave } from '@/components/Hello';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
@@ -16,26 +15,23 @@ export default function HomeScreen() {
         />
       }>
       <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">SOBRE</ThemedText>
-        <HelloWave />
+        <ThemedText type="title">Sobre mim</ThemedText>
       </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Meu nome é Artur Fernandes do Prado</ThemedText>
+      <ThemedView style={styles.titleContainer}>
+        <ThemedText type="title">Meu nome é Artur Fernandes do Prado</ThemedText>
         <ThemedView style={styles.titleContainer}>
           <ThemedText type="defaultSemiBold">Eu sou aluno do Colégio Estadual Civico Militar Guido Arzua</ThemedText>
+          </ThemedView>
           {' '}
-          </ThemedText>{' '}
+         {' '}
+          
         <ThemedView style={styles.titleContainer}></ThemedView>
       </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText>
+      <ThemedView style={styles.titleContainer}>
           Tenho 18 anos, estou no terceiro ano do ensino médio do curso técnico
-        </ThemedText>
       </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText>
+      <ThemedView style={styles.titleContainer}>
           Sou muito bem compromissado com a minha namorada e ela é muito especial para mim.{' '}
-        </ThemedText>
       </ThemedView>
     </ParallaxScrollView>
   );
@@ -44,12 +40,10 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   titleContainer: {
     alignItems: 'center',
-    gap: 8,
+    padding: 0,
+    gap: -50,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
+
   reactLogo: {
     height: 178,
     width: 290,

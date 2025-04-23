@@ -4,9 +4,8 @@ import {
   ScrollView,
   View,
   Text,
-  Pressable,
-} from 'react-native';
-import React, { useEffect, useState } from 'react';
+  Pressable} from 'react-native';
+import { useEffect, useState } from 'react';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
@@ -67,24 +66,12 @@ export default function TabTwoScreen() {
           style={styles.headerImage}
         />
       }
-      backgroundColor={backgroundColor}> {/* Definindo o fundo como branco */}
+      backgroundColor={backgroundColor}>
       <ThemedView style={styles.titleContainer}>
         <ThemedText type="title" style={{ color: textColor }}>
           Como funciona a variação de moeda?
         </ThemedText>
       </ThemedView>
-
-      {/* Botão para alternar o tema */}
-      <Pressable
-        style={[
-          styles.toggleButton,
-          { backgroundColor: inputBackground, borderColor: inputBorderColor },
-        ]}
-        onPress={toggleTheme}>
-        <Text style={{ color: textColor, fontWeight: 'bold' }}>
-          Mudar para modo {isDarkMode ? 'claro' : 'escuro'}
-        </Text>
-      </Pressable>
 
       <Text style={[styles.paragraph, { color: textColor }]}>
         A variação de moeda acontece devido a diversos fatores econômicos e políticos. Entre eles:
@@ -107,11 +94,8 @@ export default function TabTwoScreen() {
             JPY: {dailyRates.JPY?.toFixed(2)}
           </Text>
         </View>
-      ) : (
-        <Text style={{ color: textColor, marginTop: 10 }}>
-          Carregando dados...
-        </Text>
-      )}
+      ) : 
+     <Text style={[styles.noResults, { color: textColor }]}></Text>}
 
       <ThemedView style={styles.searchContainer}>
         <TextInput
