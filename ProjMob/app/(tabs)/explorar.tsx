@@ -1,199 +1,135 @@
-import {
-  StyleSheet,
-  TextInput,
-  ScrollView,
-  View,
-  Text,
-  Pressable} from 'react-native';
-import { useEffect, useState } from 'react';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-import { IconSymbol } from '@/components/ui/IconSymbol';
+import React, { useState } from 'react';
+import Constants from 'expo-constants';
+import { View, Text, TextInput, Button, ScrollView, StyleSheet, KeyboardAvoidingView, Platform, Image } from 'react-native';
 
-export default function TabTwoScreen() {
-  // Modo padrão: 'light' (modo claro)
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
-  const isDarkMode = theme === 'dark';
+const OPENAI_API_KEY = Constants.manifest?.extra?.openaiApiKey || '';
 
-  const [dailyRates, setDailyRates] = useState<any>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filteredRates, setFilteredRates] = useState<any>({});
+export default function FinancialEducationAI() {
+  const [question, setQuestion] = useState('');
+  const [response, setResponse] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    fetch('https://api.exchangerate.host/latest?base=BRL')
-      .then((response) => response.json())
-      .then((data) => {
-        setDailyRates(data.rates);
-      })
-      .catch((error) =>
-        console.error('Erro ao buscar variação diária da moeda:', error)
-      );
-  }, []);
-
-  useEffect(() => {
-    if (searchQuery.trim() !== '' && dailyRates) {
-      const filtered = Object.fromEntries(
-        Object.entries(dailyRates).filter(([key]) =>
-          key.toUpperCase().includes(searchQuery.toUpperCase())
-        )
-      );
-      setFilteredRates(filtered);
-    } else {
-      setFilteredRates({});
+  const askAI = async (query: string) => {
+    if (!OPENAI_API_KEY) {
+      setResponse('Chave da API não configurada. Por favor, configure a chave da API do OpenAI.');
+      return;
     }
-  }, [searchQuery, dailyRates]);
-
-  // Função para alternar entre os modos claro e escuro
-  const toggleTheme = () => {
-    setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
+    setLoading(true);
+    setResponse('');
+    try {
+      const res = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${OPENAI_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: 'gpt-3.5-turbo',
+          messages: [
+            { role: 'system', content: 'Você é um assistente que ajuda com educação financeira.' },
+            { role: 'user', content: query },
+          ],
+          max_tokens: 500,
+          temperature: 0.7,
+        }),
+      });
+      const data = await res.json();
+      console.log('OpenAI API response:', data);
+      if (data.choices && data.choices.length > 0 && data.choices[0].message && data.choices[0].message.content) {
+        setResponse(data.choices[0].message.content.trim());
+      } else if (data.error && data.error.message) {
+        setResponse(`Erro da API: ${data.error.message}`);
+      } else {
+        setResponse('Desculpe, não consegui obter uma resposta.');
+      }
+    } catch (error) {
+      console.error('Erro ao conectar com a API da I.A.:', error);
+      setResponse('Erro ao conectar com a API da I.A.');
+    }
+    setLoading(false);
   };
 
-  // Definição de cores de fundo e texto com base no modo
-  const backgroundColor = '#FFFFFF'; // Fundo branco para todo o site
-  const textColor = isDarkMode ? '#FFFFFF' : '#000000';
-  const inputBackground = isDarkMode ? '#2E2E2E' : '#F0F0F0';
-  const inputBorderColor = isDarkMode ? '#555555' : '#AAAAAA';
+  const handleAsk = () => {
+    if (question.trim() === '') return;
+    askAI(question);
+  };
 
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D67800', dark: '#8B4500' }}
-      headerImage={
-        <IconSymbol
-          size={310}
-          color="#FFCC33"
-          name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
-        />
-      }
-      backgroundColor={backgroundColor}>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title" style={{ color: textColor }}>
-          Como funciona a variação de moeda?
-        </ThemedText>
-      </ThemedView>
-
-      <Text style={[styles.paragraph, { color: textColor }]}>
-        A variação de moeda acontece devido a diversos fatores econômicos e políticos. Entre eles:
-        {'\n'}• Inflação e taxa de juros{'\n'}• Estabilidade política{'\n'}• Oferta e demanda por moedas estrangeiras{'\n'}• Balança comercial e reservas internacionais{'\n'}
-        Acompanhe abaixo a variação diária das principais moedas em relação ao Real (BRL):
-      </Text>
-
-      {dailyRates ? (
-        <View style={[styles.table, { backgroundColor: inputBackground }]}>
-          <Text style={[styles.tableRow, { color: textColor }]}>
-            USD: {dailyRates.USD?.toFixed(2)}
-          </Text>
-          <Text style={[styles.tableRow, { color: textColor }]}>
-            EUR: {dailyRates.EUR?.toFixed(2)}
-          </Text>
-          <Text style={[styles.tableRow, { color: textColor }]}>
-            GBP: {dailyRates.GBP?.toFixed(2)}
-          </Text>
-          <Text style={[styles.tableRow, { color: textColor }]}>
-            JPY: {dailyRates.JPY?.toFixed(2)}
-          </Text>
-        </View>
-      ) : 
-     <Text style={[styles.noResults, { color: textColor }]}></Text>}
-
-      <ThemedView style={styles.searchContainer}>
-        <TextInput
-          style={[
-            styles.input,
-            {
-              backgroundColor: inputBackground,
-              color: textColor,
-              borderColor: inputBorderColor,
-            },
-          ]}
-          placeholder="Buscar moeda..."
-          placeholderTextColor={isDarkMode ? '#CCCCCC' : '#555555'}
-          onChangeText={setSearchQuery}
-          value={searchQuery}
-        />
-      </ThemedView>
-
-      {Object.keys(filteredRates).length > 0 ? (
-        <ScrollView
-          style={[
-            styles.searchResults,
-            { backgroundColor: inputBackground },
-          ]}>
-          {Object.entries(filteredRates).map(([currency, rate], index) => (
-            <Text
-              key={index}
-              style={[styles.searchResultText, { color: textColor }]}>
-              {currency}: {parseFloat(rate).toFixed(2)}
-            </Text>
-          ))}
-        </ScrollView>
-      ) : searchQuery.length > 0 ? (
-        <Text style={[styles.noResults, { color: textColor }]}>
-          Nenhuma moeda encontrada.
-        </Text>
-      ) : null}
-    </ParallaxScrollView>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      <Image
+        source={require('../../assets/images/crash-Photoroom.png')}
+        style={styles.image}
+        resizeMode="cover"
+      />
+      <Text style={styles.title}>Converse com a I.A. sobre Educação Financeira</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Digite sua pergunta aqui"
+        value={question}
+        onChangeText={setQuestion}
+        multiline
+      />
+      <Button title={loading ? 'Carregando...' : 'Perguntar'} onPress={handleAsk} disabled={loading} />
+      <ScrollView style={styles.responseContainer}>
+        <Text style={styles.responseText}>{response}</Text>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  headerImage: {
-    color: '#FFCC33',
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
+  container: {
+    flex: 1,
+    padding: 25,
+    backgroundColor: '#e6f0ff',
   },
-  titleContainer: {
-    flexDirection: 'row',
-    gap: 8,
+  image: {
+    width: '100%',
+    height: 200,
+    marginBottom: 25,
+    borderRadius: 15,
   },
-  toggleButton: {
-    marginTop: 10,
-    alignSelf: 'flex-start',
-    padding: 10,
-    borderRadius: 6,
-    borderWidth: 1,
-  },
-  paragraph: {
-    fontSize: 16,
-    marginTop: 10,
-  },
-  table: {
-    marginTop: 20,
-    padding: 10,
-    borderRadius: 5,
-  },
-  tableRow: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 5,
-  },
-  searchContainer: {
-    marginTop: 20,
-    padding: 10,
+  title: {
+    fontSize: 26,
+    fontWeight: '700',
+    marginBottom: 20,
+    textAlign: 'center',
+    color: '#1a237e',
   },
   input: {
-    height: 40,
+    borderColor: '#7a8cff',
     borderWidth: 2,
-    paddingHorizontal: 10,
-    borderRadius: 5,
-    fontWeight: 'bold',
-  },
-  searchResults: {
-    marginTop: 10,
-    maxHeight: 200,
-    borderRadius: 5,
-    padding: 10,
-  },
-  searchResultText: {
+    borderRadius: 15,
+    padding: 18,
+    minHeight: 90,
+    marginBottom: 15,
+    backgroundColor: '#ffffff',
+    textAlignVertical: 'top',
     fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.15,
+    shadowRadius: 5,
+    elevation: 4,
   },
-  noResults: {
-    marginTop: 10,
-    fontSize: 16,
-    fontWeight: 'bold',
+  responseContainer: {
+    marginTop: 25,
+    backgroundColor: '#cfd9ff',
+    borderRadius: 15,
+    padding: 20,
+    minHeight: 120,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 5,
+  },
+  responseText: {
+    fontSize: 19,
+    lineHeight: 28,
+    color: '#0d1a66',
   },
 });

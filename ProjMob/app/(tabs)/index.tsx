@@ -48,11 +48,11 @@ const HomeScreen = () => {
   return (
     <View style={styles.container}>
       <ImageBackground 
-        source={require('@/assets/images/fundo-crash.png')} 
+        source={require('../../assets/images/fundo-crash.png')}
         style={styles.headerBackground}
       >
         <Image 
-          source={require('@/assets/images/crash.png')}
+          source={require('../../assets/images/crash.png')}
           style={styles.characterImage}
         />
       </ImageBackground>
@@ -177,6 +177,8 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   currencyButton: {
+    width: 80,
+    height: 40,
     paddingVertical: 10,
     paddingHorizontal: 16,
     backgroundColor: '#f2f2f2',
@@ -190,6 +192,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 3,
     elevation: 2,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   selectedCurrencyButton: {
     backgroundColor: '#FFA500',
@@ -199,6 +203,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#333',
     fontSize: 16,
+    textAlign: 'center',
   },
   selectedCurrencyButtonText: {
     color: '#fff',

@@ -1,0 +1,16 @@
+Corrections needed in ProjMob/app/(tabs)/explorar.tsx:
+
+- Fix import statements to use single quotes instead of double single quotes:
+  import ParallaxScrollView from 'components/ParallaxScrollView';
+  import { ThemedText } from 'components/ThemedText';
+  import { ThemedView } from 'components/ThemedView';
+  import { IconSymbol } from 'components/ui/IconSymbol';
+
+- Review code for any other issues or improvements.
+
+Plan:
+- Edit explorar.tsx to fix import statements.
+- Review and improve code style and error handling.
+- Optionally check other open files if needed.
+
+Please confirm if I can proceed with these corrections.
