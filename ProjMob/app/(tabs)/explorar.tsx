@@ -1,57 +1,68 @@
-import React, { useState } from 'react';
-import Constants from 'expo-constants';
-import { View, Text, TextInput, Button, ScrollView, StyleSheet, KeyboardAvoidingView, Platform, Image } from 'react-native';
+import React, { useState, useRef, useEffect } from 'react';
+import { View, Text, TextInput, Button, ScrollView, StyleSheet, KeyboardAvoidingView, Platform, Image, TouchableOpacity } from 'react-native';
 
-const OPENAI_API_KEY = Constants.manifest?.extra?.openaiApiKey || '';
+const FAKE_RESPONSES: { [key: string]: string } = {
+  'o que é educação financeira': `Educação financeira é o processo de adquirir conhecimentos e habilidades para gerenciar de forma eficaz os recursos financeiros pessoais. Isso inclui aprender a fazer orçamentos, controlar gastos, poupar, investir e planejar para o futuro. Uma boa educação financeira ajuda a tomar decisões conscientes que promovem a estabilidade econômica e a realização de objetivos financeiros a longo prazo.`,
 
-export default function FinancialEducationAI() {
-  const [question, setQuestion] = useState('');
-  const [response, setResponse] = useState('');
-  const [loading, setLoading] = useState(false);
+  'como economizar dinheiro': `Economizar dinheiro envolve a criação de um plano financeiro que permita gastar menos do que se ganha. Para isso, é importante elaborar um orçamento mensal detalhado, identificar despesas desnecessárias e buscar alternativas mais econômicas. Além disso, estabelecer metas claras de poupança, como um fundo de emergência ou investimentos, ajuda a manter a disciplina financeira e a garantir segurança em situações imprevistas.`,
 
-  const askAI = async (query: string) => {
-    if (!OPENAI_API_KEY) {
-      setResponse('Chave da API não configurada. Por favor, configure a chave da API do OpenAI.');
-      return;
+  'o que é investimento': `Investimento é a aplicação de recursos financeiros em ativos com o objetivo de obter retorno ao longo do tempo. Existem diversos tipos de investimentos, como ações, títulos públicos, fundos imobiliários e poupança. Cada tipo possui características específicas de risco e rentabilidade. Entender o perfil de investidor e os objetivos financeiros é fundamental para escolher os investimentos mais adequados e alcançar a independência financeira.`,
+
+  'como sair das dívidas': `Sair das dívidas requer planejamento e disciplina. O primeiro passo é listar todas as dívidas, incluindo valores, taxas de juros e prazos. Priorize o pagamento das dívidas com juros mais altos para reduzir o custo total. Negociar condições melhores com credores também pode ajudar. Paralelamente, evite contrair novas dívidas e ajuste seu orçamento para aumentar a capacidade de pagamento. Com persistência, é possível recuperar a saúde financeira.`,
+
+  'qual a importância do orçamento': `O orçamento é uma ferramenta essencial para o controle financeiro pessoal. Ele permite visualizar todas as fontes de renda e despesas, facilitando a identificação de gastos excessivos e a definição de prioridades. Com um orçamento bem elaborado, é possível planejar investimentos, poupar para objetivos futuros e evitar o endividamento. Além disso, o orçamento promove maior consciência sobre o uso do dinheiro, contribuindo para uma vida financeira equilibrada e segura.`,
+};
+
+const POPULAR_QUESTIONS = Object.keys(FAKE_RESPONSES);
+
+function getFakeResponse(question: string): string {
+  const lowerQuestion = question.toLowerCase();
+  for (const key in FAKE_RESPONSES) {
+    if (lowerQuestion.includes(key)) {
+      return FAKE_RESPONSES[key];
     }
-    setLoading(true);
-    setResponse('');
-    try {
-      const res = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${OPENAI_API_KEY}`,
-        },
-        body: JSON.stringify({
-          model: 'gpt-3.5-turbo',
-          messages: [
-            { role: 'system', content: 'Você é um assistente que ajuda com educação financeira.' },
-            { role: 'user', content: query },
-          ],
-          max_tokens: 500,
-          temperature: 0.7,
-        }),
-      });
-      const data = await res.json();
-      console.log('OpenAI API response:', data);
-      if (data.choices && data.choices.length > 0 && data.choices[0].message && data.choices[0].message.content) {
-        setResponse(data.choices[0].message.content.trim());
-      } else if (data.error && data.error.message) {
-        setResponse(`Erro da API: ${data.error.message}`);
-      } else {
-        setResponse('Desculpe, não consegui obter uma resposta.');
-      }
-    } catch (error) {
-      console.error('Erro ao conectar com a API da I.A.:', error);
-      setResponse('Erro ao conectar com a API da I.A.');
-    }
-    setLoading(false);
+  }
+  return 'Desculpe, não tenho uma resposta para essa pergunta. Por favor, tente outra pergunta sobre educação financeira.';
+}
+
+type Message = {
+  id: number;
+  text: string;
+  sender: 'user' | 'ai';
+  isOption?: boolean;
+};
+
+export default function FinancialEducationFakeAI() {
+  const [input, setInput] = useState('');
+  const [messages, setMessages] = useState<Message[]>(() =>
+    POPULAR_QUESTIONS.map((q, i) => ({
+      id: i + 1,
+      text: q,
+      sender: 'ai',
+      isOption: true,
+    }))
+  );
+  const scrollViewRef = useRef<ScrollView>(null);
+
+  useEffect(() => {
+    scrollViewRef.current?.scrollToEnd({ animated: true });
+  }, [messages]);
+
+  const sendMessage = (text: string, sender: 'user' | 'ai', isOption = false) => {
+    setMessages((prev) => [...prev, { id: prev.length + 1, text, sender, isOption }]);
   };
 
-  const handleAsk = () => {
-    if (question.trim() === '') return;
-    askAI(question);
+  const handleSend = () => {
+    if (input.trim() === '') return;
+    sendMessage(input, 'user');
+    const answer = getFakeResponse(input);
+    sendMessage(answer, 'ai');
+    setInput('');
+  };
+
+  const handleSelectOption = (text: string) => {
+    // Instead of sending immediately, just set input text for user to edit/send
+    setInput(text);
   };
 
   return (
@@ -65,17 +76,46 @@ export default function FinancialEducationAI() {
         resizeMode="cover"
       />
       <Text style={styles.title}>Converse com a I.A. sobre Educação Financeira</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Digite sua pergunta aqui"
-        value={question}
-        onChangeText={setQuestion}
-        multiline
-      />
-      <Button title={loading ? 'Carregando...' : 'Perguntar'} onPress={handleAsk} disabled={loading} />
-      <ScrollView style={styles.responseContainer}>
-        <Text style={styles.responseText}>{response}</Text>
+
+      <ScrollView
+        style={styles.chatContainer}
+        ref={scrollViewRef}
+        contentContainerStyle={styles.chatContent}
+      >
+        {messages.map((msg) => (
+          <TouchableOpacity
+            key={msg.id}
+            disabled={!msg.isOption}
+            onPress={() => msg.isOption && handleSelectOption(msg.text)}
+            style={[
+              styles.messageBubble,
+              msg.sender === 'user' ? styles.userBubble : styles.aiBubble,
+              msg.isOption && styles.optionBubble,
+            ]}
+          >
+            <Text
+              style={[
+                styles.messageText,
+                msg.sender === 'user' ? styles.userText : styles.aiText,
+                msg.isOption && styles.optionText,
+              ]}
+            >
+              {msg.text}
+            </Text>
+          </TouchableOpacity>
+        ))}
       </ScrollView>
+
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={styles.input}
+          placeholder="Digite sua pergunta aqui"
+          value={input}
+          onChangeText={setInput}
+          multiline
+        />
+        <Button title="Enviar" onPress={handleSend} />
+      </View>
     </KeyboardAvoidingView>
   );
 }
@@ -83,53 +123,78 @@ export default function FinancialEducationAI() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 25,
+    padding: 15,
     backgroundColor: '#e6f0ff',
   },
   image: {
     width: '100%',
-    height: 200,
-    marginBottom: 25,
+    height: 180,
+    marginBottom: 10,
     borderRadius: 15,
   },
   title: {
-    fontSize: 26,
+    fontSize: 22,
     fontWeight: '700',
-    marginBottom: 20,
+    marginBottom: 10,
     textAlign: 'center',
     color: '#1a237e',
   },
+  chatContainer: {
+    flex: 1,
+    marginBottom: 10,
+    paddingHorizontal: 10,
+  },
+  chatContent: {
+    paddingBottom: 10,
+  },
+  messageBubble: {
+    maxWidth: '80%',
+    borderRadius: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    marginVertical: 5,
+  },
+  optionBubble: {
+    backgroundColor: '#d0d9ff',
+  },
+  userBubble: {
+    backgroundColor: '#7a8cff',
+    alignSelf: 'flex-end',
+    borderBottomRightRadius: 0,
+  },
+  aiBubble: {
+    backgroundColor: '#cfd9ff',
+    alignSelf: 'flex-start',
+    borderBottomLeftRadius: 0,
+  },
+  messageText: {
+    fontSize: 16,
+  },
+  optionText: {
+    color: '#1a237e',
+    fontWeight: '600',
+  },
+  userText: {
+    color: '#fff',
+  },
+  aiText: {
+    color: '#0d1a66',
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    paddingBottom: Platform.OS === 'ios' ? 20 : 10,
+  },
   input: {
+    flex: 1,
     borderColor: '#7a8cff',
     borderWidth: 2,
     borderRadius: 15,
-    padding: 18,
-    minHeight: 90,
-    marginBottom: 15,
-    backgroundColor: '#ffffff',
-    textAlignVertical: 'top',
-    fontSize: 18,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.15,
-    shadowRadius: 5,
-    elevation: 4,
-  },
-  responseContainer: {
-    marginTop: 25,
-    backgroundColor: '#cfd9ff',
-    borderRadius: 15,
-    padding: 20,
-    minHeight: 120,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-    elevation: 5,
-  },
-  responseText: {
-    fontSize: 19,
-    lineHeight: 28,
-    color: '#0d1a66',
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    fontSize: 16,
+    backgroundColor: '#fff',
+    marginRight: 10,
   },
 });

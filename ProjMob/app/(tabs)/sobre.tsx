@@ -1,54 +1,49 @@
 import { Image, StyleSheet, Platform } from 'react-native';
 
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import ParallaxScrollView from '../../components/ParallaxScrollView';
+import { ThemedText } from '../../components/ThemedText';
+import { ThemedView } from '../../components/ThemedView';
 
-export default function HomeScreen() {
+export const unstable_settings = {
+  headerShown: false,
+};
+
+export default function AboutScreen() {
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
+      headerImage={null} // Remove parallax image
+    >
+      <ThemedView style={styles.container}>
         <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
+          source={require('../../assets/images/crash.png')}
+          style={styles.headerImage}
         />
-      }>
-      <ThemedView style={styles.titleContainer}>
         <ThemedText type="title">Sobre mim</ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Meu nome é Artur Fernandes do Prado</ThemedText>
-        <ThemedView style={styles.titleContainer}>
-          <ThemedText type="defaultSemiBold">Eu sou aluno do Colégio Estadual Civico Militar Guido Arzua</ThemedText>
-          </ThemedView>
-          {' '}
-         {' '}
-          
-        <ThemedView style={styles.titleContainer}></ThemedView>
-      </ThemedView>
-      <ThemedView style={styles.titleContainer}>
-          Tenho 18 anos, estou no terceiro ano do ensino médio do curso técnico
-      </ThemedView>
-      <ThemedView style={styles.titleContainer}>
-          Sou muito bem compromissado com a minha namorada e ela é muito especial para mim.{' '}
+        <ThemedText type="defaultSemiBold">Artur Fernandes do Prado</ThemedText>
+        <ThemedText type="default">
+          Olá! Meu nome é Artur Fernandes do Prado. Sou aluno do Colégio Estadual Cívico Militar Guido Arzua, atualmente no terceiro ano do ensino médio do curso técnico.
+        </ThemedText>
+        <ThemedText type="default">
+          Tenho 18 anos e sou uma pessoa comprometida com minha namorada, que é muito especial para mim.
+        </ThemedText>
+        <ThemedText type="default">
+          Sou apaixonado por aprender e estou sempre buscando crescer pessoal e academicamente.
+        </ThemedText>
       </ThemedView>
     </ParallaxScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    alignItems: 'center',
-    padding: 0,
-    gap: -50,
+  container: {
+    padding: 20,
+    gap: 15,
   },
-
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  headerImage: {
+    width: '100%',
+    height: 200,
+    resizeMode: 'cover',
+    marginBottom: 20,
   },
 });
